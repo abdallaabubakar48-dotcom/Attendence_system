@@ -2,20 +2,29 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance System</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f0f2f5; }
+        .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #message { margin-top: 15px; text-align: center; font-size: 14px; }
+    </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Sajili Mahudhurio</h2>
-        <input type="text" id="name" placeholder="Jina lako kamili">
-        <input type="text" id="regNo" placeholder="Namba ya Usajili">
-        <button onclick="submitAttendance()">Hifadhi Mahudhurio</button>
-        <p id="message"></p>
-    </div>
-    <!-- Firebase SDK link -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script src="app.js"></script>
+
+<div class="box">
+    <h2>Mahudhurio</h2>
+    <input type="text" id="name" placeholder="Jina Kamili">
+    <input type="text" id="regNo" placeholder="Namba ya Usajili">
+    <button id="btn" onclick="submitAttendance()">Hifadhi Mahudhurio</button>
+    <p id="message"></p>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
