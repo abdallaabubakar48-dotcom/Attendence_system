@@ -2,25 +2,37 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance System</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f0f2f5; }
-        .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:disabled { background: #ccc; }
-        #message { margin-top: 15px; text-align: center; font-size: 14px; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f7f6; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>Mahudhurio</h2>
+<div class="container">
+    <h2>Sajili Mahudhurio</h2>
     <input type="text" id="name" placeholder="Jina Kamili">
     <input type="text" id="regNo" placeholder="Namba ya Usajili">
-    <button id="btn" onclick="submitAttendance()">Hifadhi Mahudhurio</button>
+    <button id="submitBtn" onclick="submitAttendance()">Hifadhi Mahudhurio</button>
     <p id="message"></p>
+
+    <h3>Orodha ya Wanafunzi</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Jina</th>
+                <th>Namba</th>
+                <th>Muda</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
