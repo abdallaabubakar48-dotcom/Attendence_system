@@ -2,13 +2,13 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Attendance System</title>
+    <title>Attendance - Zanzibar University</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #attendanceArea { display: none; margin-top: 20px; } /* Imefichwa mwanzo */
+        #attendanceArea { display: none; margin-top: 20px; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     </style>
@@ -16,13 +16,10 @@
 <body>
 
 <div class="container">
-    <h2>Karibu kwenye Mahudhurio</h2>
-    <div id="loginArea">
-        <input type="text" id="name" placeholder="Jina Kamili">
-        <input type="text" id="regNo" placeholder="Namba ya Usajili">
-        <button id="submitBtn">Hifadhi & Angalia Waliofika</button>
-    </div>
-
+    <h2>Zanzibar University Attendance</h2>
+    <input type="text" id="name" placeholder="Jina Kamili">
+    <input type="text" id="regNo" placeholder="Namba ya Usajili">
+    <button id="submitBtn">Hifadhi Mahudhurio</button>
     <p id="message"></p>
 
     <div id="attendanceArea">
@@ -50,20 +47,27 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const TARGET_LAT = -6.223002; 
-    const TARGET_LONG = 39.312219;
+    
+    // Namba zako mpya
+    const TARGET_LAT = -6.223173; 
+    const TARGET_LONG = 39.312906;
 
     document.getElementById('submitBtn').addEventListener('click', () => {
+        const msg = document.getElementById('message');
+        msg.innerText = "Inakagua eneo lako, tafadhali subiri...";
+
         navigator.geolocation.getCurrentPosition((pos) => {
             const dist = getDist(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LONG);
             
-            if (dist <= 0.1) {
-                // Ikiwa yuko eneo sahihi, hifadhi na onyesha orodha
+            // Tumeongeza mpaka mita 200 (0.2km) ili iwe rahisi kukubali
+            if (dist <= 0.2) {
                 saveAndShow();
             } else {
-                document.getElementById('message').innerText = "❌ Huwezi kuhifadhi! Upo nje ya eneo la Chuo.";
+                msg.innerText = "❌ Upo nje ya eneo la Chuo. (Umbali: " + (dist*1000).toFixed(0) + "m)";
             }
-        }, () => { alert("Tafadhali ruhusu Location!"); }, {enableHighAccuracy: true});
+        }, (err) => { 
+            msg.innerText = "Tafadhali washa GPS/Location kwenye simu yako!"; 
+        }, {enableHighAccuracy: true, timeout: 10000});
     });
 
     function saveAndShow() {
@@ -72,11 +76,8 @@
         if(!n || !r) return alert("Jaza taarifa!");
 
         db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleTimeString() });
-        
-        // Onyesha eneo la orodha
         document.getElementById('attendanceArea').style.display = "block";
-        document.getElementById('message').innerText = "✅ Umefanikiwa! Hii hapa ni orodha ya wenzako:";
-        
+        document.getElementById('message').innerText = "✅ Mahudhurio yamehifadhiwa!";
         loadData();
     }
 
