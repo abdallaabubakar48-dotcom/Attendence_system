@@ -1,4 +1,4 @@
-// 1. Sanidi Firebase
+// 1. Sanidi Firebase (Kumbuka kuweka config zako hapa)
 const firebaseConfig = {
   apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
   authDomain: "attendancesystem-ecd0a.firebaseapp.com",
@@ -9,43 +9,67 @@ const firebaseConfig = {
   appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
 };
 
-// Initialize
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 2. Function ya kutuma data
+// 2. Kazi ya kuhifadhi mahudhurio (Submit Attendance)
 function submitAttendance() {
-    const name = document.getElementById('name').value;
-    const regNo = document.getElementById('regNo').value;
-    const btn = document.getElementById('btn');
-    const msg = document.getElementById('message');
+    const nameInput = document.getElementById('name');
+    const regNoInput = document.getElementById('regNo');
+    const message = document.getElementById('message');
+    const btn = document.getElementById('submitBtn');
+
+    const name = nameInput.value;
+    const regNo = regNoInput.value;
 
     if(name === "" || regNo === "") {
-        msg.innerText = "Tafadhali jaza nafasi zote!";
-        msg.style.color = "red";
+        alert("Tafadhali jaza nafasi zote!");
         return;
     }
 
     btn.disabled = true;
     btn.innerText = "Inatuma...";
 
-    // Kutuma kwenye Realtime Database
+    // Tuma data kwenye Firebase
     db.ref('attendance/').push({
         jina: name,
         namba: regNo,
         muda: new Date().toLocaleString()
     })
     .then(() => {
-        msg.innerText = "Imefanikiwa!";
-        msg.style.color = "green";
-        document.getElementById('name').value = "";
-        document.getElementById('regNo').value = "";
+        message.innerText = "Imefanikiwa!";
+        message.style.color = "green";
+        nameInput.value = "";
+        regNoInput.value = "";
         btn.disabled = false;
         btn.innerText = "Hifadhi Mahudhurio";
     })
     .catch((error) => {
-        msg.innerText = "Hitilafu imetokea!";
+        message.innerText = "Kuna tatizo, jaribu tena.";
         btn.disabled = false;
         btn.innerText = "Hifadhi Mahudhurio";
     });
 }
+
+// 3. Kazi ya kusoma data zote (Display Attendance)
+// Hii inafanya kazi moja kwa moja bila wewe kugusa kitu
+const tableBody = document.getElementById('tableBody');
+
+db.ref('attendance/').on('value', (snapshot) => {
+    tableBody.innerHTML = ""; // Safisha jedwali kwanza
+    
+    // Angalia kila mwanafunzi aliyeko kwenye database
+    snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        
+        // Ongeza mstari mpya kwenye jedwali lako
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${data.jina}</td>
+            <td>${data.namba}</td>
+            <td>${data.muda}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+});
