@@ -3,61 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZU Attendance Pro</title>
+    <title>ZU Attendance Portal</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'Segoe UI', sans-serif; background: #ecf0f1; margin: 0; padding: 0; }
+        :root { --primary: #0056b3; --success: #28a745; --danger: #dc3545; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .wrapper { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin-bottom: 25px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; margin-top: 10px; transition: 0.3s; }
+        button:hover { opacity: 0.9; }
         
-        /* Navigation/Tabs */
-        .nav { display: flex; background: var(--primary); color: white; justify-content: space-around; padding: 15px; }
-        .nav-item { cursor: pointer; opacity: 0.7; }
-        .nav-item.active { opacity: 1; border-bottom: 2px solid white; }
-
-        .container { max-width: 600px; margin: 20px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        #appArea { display: none; }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-primary { background: var(--primary); }
         
-        .page { display: none; }
-        .page.active { display: block; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { color: var(--primary); }
+        #tableContainer { height: 250px; overflow-y: auto; border: 1px solid #eee; margin-top: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #eee; position: sticky; top: 0; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        #adminArea { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ddd; }
     </style>
 </head>
 <body>
 
-<div class="nav" id="mainNav" style="display:none;">
-    <div class="nav-item active" onclick="showPage('home')">Dashboard</div>
-    <div class="nav-item" onclick="showPage('admin')">Admin</div>
-</div>
-
-<div class="container">
-    <div id="loginPage" class="page active">
-        <h2>Ingia kwenye Mfumo</h2>
-        <input type="email" id="email" placeholder="Email">
+<div class="wrapper">
+    <div id="loginArea">
+        <h2>Karibu ZU Portal</h2>
+        <input type="email" id="email" placeholder="Email ya Mwanafunzi">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="login()" style="background:var(--accent);">Ingia Sasa</button>
-        <button onclick="signup()" style="background:#7f8c8d;">Jisajili (Sign Up)</button>
+        <button class="btn-primary" onclick="login()">Ingia Sasa</button>
+        <button class="btn-primary" style="background:#6c757d;" onclick="signup()">Jisajili Mwanafunzi</button>
     </div>
 
-    <div id="homePage" class="page">
-        <h3>Mahudhurio ya Chuo</h3>
+    <div id="appArea">
+        <h2>Mahudhurio</h2>
         <input type="text" id="name" placeholder="Jina Kamili">
         <input type="text" id="regNo" placeholder="Namba ya Usajili">
-        <button id="submitBtn" style="background:var(--success);">Tuma Mahudhurio</button>
-        <button onclick="logout()" style="background:var(--danger);">Toka</button>
-        <p id="message"></p>
-        <div style="max-height: 200px; overflow-y: auto;">
-            <table><thead><tr><th>Jina</th><th>Muda</th></tr></thead><tbody id="tableBody"></tbody></table>
-        </div>
-    </div>
+        <button id="submitBtn" class="btn-success">Hifadhi Mahudhurio</button>
+        <button class="btn-danger" onclick="logout()">Toka (Logout)</button>
+        <p id="message" style="text-align:center; font-weight:bold;"></p>
 
-    <div id="adminPage" class="page">
-        <h3>Admin Panel</h3>
-        <input type="password" id="adminPass" placeholder="Admin Password">
-        <button onclick="downloadCSV()" style="background:var(--accent);">Download Ripoti (CSV)</button>
-        <button onclick="clearData()" style="background:var(--danger);">Futa Data Zote</button>
+        <div id="tableContainer">
+            <table>
+                <thead><tr><th>Jina</th><th>Namba</th><th>Muda</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="adminArea">
+            <h4>Admin Control</h4>
+            <input type="password" id="adminPass" placeholder="Admin Password">
+            <button class="btn-primary" onclick="downloadCSV()">Download Ripoti (CSV)</button>
+            <button class="btn-danger" onclick="clearData()">Futa Data Zote</button>
+        </div>
     </div>
 </div>
 
@@ -66,34 +66,91 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
 <script>
-    // --- SETUP NA GEOFENCE ---
-    const firebaseConfig = { /* (WEKA CONFIG YAKO HAPA) */ };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
+      authDomain: "attendancesystem-ecd0a.firebaseapp.com",
+      databaseURL: "https://attendancesystem-ecd0a-default-rtdb.firebaseio.com",
+      projectId: "attendancesystem-ecd0a",
+      storageBucket: "attendancesystem-ecd0a.firebasestorage.app",
+      messagingSenderId: "505261139314",
+      appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
+    };
+
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth(); const db = firebase.database();
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    // --- NAVIGATION LOGIC ---
-    function showPage(page) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(page + 'Page').classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    // --- FUNCTIONALITY (HII NI ILE ILE ILIYOTHIBITIKA) ---
-    // ... [Jumuisha functions zako za Login, Attendance, Geofencing, CSV hapa] ...
-
+    // Logic ya kubadili views bila reload
     auth.onAuthStateChanged(user => {
         if(user) {
-            document.getElementById('loginPage').classList.remove('active');
-            document.getElementById('homePage').classList.add('active');
-            document.getElementById('mainNav').style.display = 'flex';
+            document.getElementById('loginArea').style.display = "none";
+            document.getElementById('appArea').style.display = "block";
             loadData();
         } else {
-            document.getElementById('loginPage').classList.add('active');
-            document.getElementById('homePage').classList.remove('active');
-            document.getElementById('mainNav').style.display = 'none';
+            document.getElementById('loginArea').style.display = "block";
+            document.getElementById('appArea').style.display = "none";
         }
     });
+
+    function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(e => alert(e.message)); }
+    function signup() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(e => alert(e.message)); }
+    function logout() { auth.signOut(); }
+
+    // Geofencing & Submission (Iliyobaki ile ile)
+    document.getElementById('submitBtn').addEventListener('click', () => {
+        const n = document.getElementById('name').value;
+        const r = document.getElementById('regNo').value;
+        if(!n || !r) return alert("Tafadhali jaza taarifa zote!");
+
+        navigator.geolocation.getCurrentPosition(pos => {
+            const d = getDist(pos.coords.latitude, pos.coords.longitude, -6.225432, 39.311248);
+            if(d <= 2.0) {
+                db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleString() });
+                document.getElementById('message').style.color = "green";
+                document.getElementById('message').innerText = "✅ Imefanikiwa!";
+            } else {
+                document.getElementById('message').style.color = "red";
+                document.getElementById('message').innerText = "❌ Upo nje ya eneo la Chuo.";
+            }
+        }, () => alert("Tafadhali washa GPS yako!"), {enableHighAccuracy: true});
+    });
+
+    function loadData() {
+        db.ref('attendance/').on('value', (s) => {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            s.forEach((c) => {
+                const d = c.val();
+                body.innerHTML += `<tr><td>${d.jina}</td><td>${d.namba}</td><td>${d.muda}</td></tr>`;
+            });
+        });
+    }
+
+    function clearData() {
+        if(document.getElementById('adminPass').value === "admin123") {
+            db.ref('attendance/').remove().then(() => alert("Data zimefutwa!"));
+        } else { alert("Password si sahihi!"); }
+    }
+
+    function downloadCSV() {
+        if(document.getElementById('adminPass').value !== "admin123") return alert("Password si sahihi!");
+        let csv = "Jina,Namba,Muda\n";
+        db.ref('attendance/').once('value', s => {
+            s.forEach(c => { const d = c.val(); csv += `${d.jina},${d.namba},${d.muda}\n`; });
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            a.download = 'Ripoti.csv';
+            a.click();
+        });
+    }
+
+    function getDist(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
 </script>
 </body>
 </html>
