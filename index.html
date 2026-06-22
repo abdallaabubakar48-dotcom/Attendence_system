@@ -2,33 +2,36 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahudhurio - GeoSystem</title>
+    <title>Smart Attendance System</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        #message { margin-top: 15px; font-weight: bold; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #attendanceArea { display: none; margin-top: 20px; } /* Imefichwa mwanzo */
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f8f9fa; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Mahudhurio Yangu</h2>
-    <input type="text" id="name" placeholder="Jina Kamili">
-    <input type="text" id="regNo" placeholder="Namba ya Usajili">
-    <button id="submitBtn">Hifadhi Mahudhurio</button>
+    <h2>Karibu kwenye Mahudhurio</h2>
+    <div id="loginArea">
+        <input type="text" id="name" placeholder="Jina Kamili">
+        <input type="text" id="regNo" placeholder="Namba ya Usajili">
+        <button id="submitBtn">Hifadhi & Angalia Waliofika</button>
+    </div>
+
     <p id="message"></p>
 
-    <h3>Waliohudhuria Leo:</h3>
-    <table>
-        <thead><tr><th>Jina</th><th>Namba</th><th>Muda</th></tr></thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <div id="attendanceArea">
+        <h3>Orodha ya Waliohudhuria:</h3>
+        <table>
+            <thead><tr><th>Jina</th><th>Namba</th><th>Muda</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -47,27 +50,46 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    // Kurata zako za Eneo Rasmi (Geofence)
     const TARGET_LAT = -6.223002; 
     const TARGET_LONG = 39.312219;
 
     document.getElementById('submitBtn').addEventListener('click', () => {
-        const msg = document.getElementById('message');
-        msg.innerText = "Inakagua eneo...";
-
         navigator.geolocation.getCurrentPosition((pos) => {
             const dist = getDist(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LONG);
             
-            // Geofence ya mita 100 (0.1km)
             if (dist <= 0.1) {
-                saveData();
+                // Ikiwa yuko eneo sahihi, hifadhi na onyesha orodha
+                saveAndShow();
             } else {
-                msg.innerText = "❌ Huwezi kuhifadhi! Upo mbali na eneo rasmi.";
-                msg.style.color = "red";
+                document.getElementById('message').innerText = "❌ Huwezi kuhifadhi! Upo nje ya eneo la Chuo.";
             }
-        }, () => { msg.innerText = "Tafadhali ruhusu Location!"; }, {enableHighAccuracy: true});
+        }, () => { alert("Tafadhali ruhusu Location!"); }, {enableHighAccuracy: true});
     });
+
+    function saveAndShow() {
+        const n = document.getElementById('name').value;
+        const r = document.getElementById('regNo').value;
+        if(!n || !r) return alert("Jaza taarifa!");
+
+        db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleTimeString() });
+        
+        // Onyesha eneo la orodha
+        document.getElementById('attendanceArea').style.display = "block";
+        document.getElementById('message').innerText = "✅ Umefanikiwa! Hii hapa ni orodha ya wenzako:";
+        
+        loadData();
+    }
+
+    function loadData() {
+        db.ref('attendance/').on('value', (s) => {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            s.forEach((c) => {
+                const d = c.val();
+                body.innerHTML += `<tr><td>${d.jina}</td><td>${d.namba}</td><td>${d.muda}</td></tr>`;
+            });
+        });
+    }
 
     function getDist(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -76,25 +98,6 @@
         const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
-
-    function saveData() {
-        const n = document.getElementById('name').value;
-        const r = document.getElementById('regNo').value;
-        if(!n || !r) { alert("Jaza taarifa!"); return; }
-        db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleString() });
-        document.getElementById('message').innerText = "✅ Imefanikiwa!";
-        document.getElementById('message').style.color = "green";
-    }
-
-    // Kusoma data real-time
-    db.ref('attendance/').on('value', (s) => {
-        const body = document.getElementById('tableBody');
-        body.innerHTML = "";
-        s.forEach((c) => {
-            const d = c.val();
-            body.innerHTML += `<tr><td>${d.jina}</td><td>${d.namba}</td><td>${d.muda}</td></tr>`;
-        });
-    });
 </script>
 </body>
 </html>
