@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZU Attendance Portal</title>
+    <title>ZU Attendance Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0056b3">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <style>
         :root { --primary: #0056b3; --success: #28a745; --danger: #dc3545; --bg: #f8f9fa; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .wrapper { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         h2 { color: var(--primary); text-align: center; margin-bottom: 25px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--primary); outline: none; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; margin-top: 10px; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; margin-top: 10px; }
         
         #appArea { display: none; }
         .btn-success { background: var(--success); }
@@ -66,6 +69,11 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
 <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(() => console.log('Service Worker Registered'));
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
       authDomain: "attendancesystem-ecd0a.firebaseapp.com",
@@ -80,7 +88,6 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Logic ya kubadili views bila reload
     auth.onAuthStateChanged(user => {
         if(user) {
             document.getElementById('loginArea').style.display = "none";
@@ -96,7 +103,6 @@
     function signup() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(e => alert(e.message)); }
     function logout() { auth.signOut(); }
 
-    // Geofencing & Submission (Iliyobaki ile ile)
     document.getElementById('submitBtn').addEventListener('click', () => {
         const n = document.getElementById('name').value;
         const r = document.getElementById('regNo').value;
@@ -106,10 +112,8 @@
             const d = getDist(pos.coords.latitude, pos.coords.longitude, -6.225432, 39.311248);
             if(d <= 2.0) {
                 db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleString() });
-                document.getElementById('message').style.color = "green";
                 document.getElementById('message').innerText = "✅ Imefanikiwa!";
             } else {
-                document.getElementById('message').style.color = "red";
                 document.getElementById('message').innerText = "❌ Upo nje ya eneo la Chuo.";
             }
         }, () => alert("Tafadhali washa GPS yako!"), {enableHighAccuracy: true});
