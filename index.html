@@ -2,27 +2,27 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance System</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f4f7f6; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #eee; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Sajili Mahudhurio</h2>
+    <h2>Mahudhurio</h2>
     <input type="text" id="name" placeholder="Jina Kamili">
     <input type="text" id="regNo" placeholder="Namba ya Usajili">
-    <button id="submitBtn" onclick="submitAttendance()">Hifadhi Mahudhurio</button>
+    <button id="submitBtn">Hifadhi Mahudhurio</button>
     <p id="message"></p>
 
-    <h3>Orodha ya Wanafunzi</h3>
     <table>
         <thead>
             <tr>
@@ -37,6 +37,54 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-<script src="app.js"></script>
+
+<script>
+    // 1. Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
+      authDomain: "attendancesystem-ecd0a.firebaseapp.com",
+      databaseURL: "https://attendancesystem-ecd0a-default-rtdb.firebaseio.com",
+      projectId: "attendancesystem-ecd0a",
+      storageBucket: "attendancesystem-ecd0a.firebasestorage.app",
+      messagingSenderId: "505261139314",
+      appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. Button Logic
+    document.getElementById('submitBtn').addEventListener('click', function() {
+        const name = document.getElementById('name').value;
+        const regNo = document.getElementById('regNo').value;
+        const msg = document.getElementById('message');
+
+        if(name === "" || regNo === "") {
+            alert("Tafadhali jaza nafasi zote!");
+            return;
+        }
+
+        db.ref('attendance/').push({
+            jina: name,
+            namba: regNo,
+            muda: new Date().toLocaleString()
+        }).then(() => {
+            msg.innerText = "Imefanikiwa!";
+            document.getElementById('name').value = "";
+            document.getElementById('regNo').value = "";
+        });
+    });
+
+    // 3. Load Data automatically
+    const tableBody = document.getElementById('tableBody');
+    db.ref('attendance/').on('value', (snapshot) => {
+        tableBody.innerHTML = "";
+        snapshot.forEach((child) => {
+            const data = child.val();
+            tableBody.innerHTML += `<tr><td>${data.jina}</td><td>${data.namba}</td><td>${data.muda}</td></tr>`;
+        });
+    });
+</script>
+
 </body>
 </html>
