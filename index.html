@@ -2,30 +2,48 @@
 <html lang="sw">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zanzibar University Attendance</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
-        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; color: white; margin-bottom: 5px; }
+        #loginArea, #appArea { text-align: center; }
         #appArea { display: none; }
+        /* Scrollable table */
+        #tableContainer { height: 300px; overflow-y: auto; border: 1px solid #ddd; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f8f9fa; position: sticky; top: 0; }
     </style>
 </head>
 <body>
 
-<div class="container" id="loginArea">
-    <h2>Ingia (Login)</h2>
-    <input type="email" id="email" placeholder="Email ya Mwanafunzi">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Ingia</button>
-    <button onclick="signup()" style="background:#6c757d;">Jisajili (Sign Up)</button>
-</div>
+<div class="container">
+    <div id="loginArea">
+        <h2>Ingia (Login)</h2>
+        <input type="email" id="email" placeholder="Email ya Mwanafunzi">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()" style="background:#007bff;">Ingia</button>
+        <button onclick="signup()" style="background:#6c757d;">Jisajili (Sign Up)</button>
+    </div>
 
-<div class="container" id="appArea">
-    <h2>Zanzibar University Attendance</h2>
-    <button id="submitBtn" style="background:#28a745;">Hifadhi Mahudhurio</button>
-    <button onclick="logout()" style="background:#dc3545;">Toka (Logout)</button>
-    <p id="message"></p>
+    <div id="appArea">
+        <h2>Mahudhurio</h2>
+        <input type="text" id="name" placeholder="Jina Kamili">
+        <input type="text" id="regNo" placeholder="Namba ya Usajili">
+        <button id="submitBtn" style="background:#28a745;">Hifadhi Mahudhurio</button>
+        <button onclick="logout()" style="background:#dc3545;">Toka (Logout)</button>
+        <p id="message"></p>
+
+        <div id="tableContainer">
+            <table>
+                <thead><tr><th>Jina</th><th>Namba</th><th>Muda</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
@@ -47,6 +65,7 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    // Login/Signup Functions
     function signup() {
         auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value)
         .then(() => alert("Usajili umefanikiwa!"))
@@ -65,24 +84,40 @@
         if(user) {
             document.getElementById('loginArea').style.display = "none";
             document.getElementById('appArea').style.display = "block";
+            loadData();
         } else {
             document.getElementById('loginArea').style.display = "block";
             document.getElementById('appArea').style.display = "none";
         }
     });
 
+    // Attendance Functionality
     document.getElementById('submitBtn').addEventListener('click', () => {
+        const n = document.getElementById('name').value;
+        const r = document.getElementById('regNo').value;
+        if(!n || !r) return alert("Jaza Jina na Namba!");
+
         navigator.geolocation.getCurrentPosition(pos => {
             const dist = getDist(pos.coords.latitude, pos.coords.longitude, -6.225432, 39.311248);
             if(dist <= 2.0) {
-                const user = auth.currentUser;
-                db.ref('attendance/' + user.uid).set({ email: user.email, muda: new Date().toLocaleString() });
-                document.getElementById('message').innerText = "✅ Mahudhurio yamehifadhiwa!";
+                db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleString() });
+                document.getElementById('message').innerText = "✅ Imefanikiwa!";
             } else {
-                document.getElementById('message').innerText = "❌ Upo nje ya eneo!";
+                document.getElementById('message').innerText = "❌ Upo nje ya eneo la Chuo.";
             }
         }, () => alert("Washa GPS!"), {enableHighAccuracy: true, maximumAge: 0});
     });
+
+    function loadData() {
+        db.ref('attendance/').on('value', (s) => {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = "";
+            s.forEach((c) => {
+                const d = c.val();
+                body.innerHTML += `<tr><td>${d.jina}</td><td>${d.namba}</td><td>${d.muda}</td></tr>`;
+            });
+        });
+    }
 
     function getDist(lat1, lon1, lat2, lon2) {
         const R = 6371;
