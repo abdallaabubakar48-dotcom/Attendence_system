@@ -4,63 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZU Attendance Pro</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0056b3">
-    <link rel="apple-touch-icon" href="icon.png">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #0056b3; --success: #28a745; --danger: #dc3545; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .wrapper { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-bottom: 25px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: 600; margin-top: 10px; }
+        :root { --sidebar: #2c3e50; --main: #f4f7f6; --accent: #3498db; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; background: var(--main); }
         
-        #appArea { display: none; }
-        .btn-success { background: var(--success); }
-        .btn-danger { background: var(--danger); }
-        .btn-primary { background: var(--primary); }
+        #sidebar { width: 250px; background: var(--sidebar); color: white; padding: 20px; display: none; }
+        #sidebar a { display: block; color: white; padding: 15px; text-decoration: none; cursor: pointer; }
+        #sidebar a:hover { background: #34495e; }
         
-        #tableContainer { height: 250px; overflow-y: auto; border: 1px solid #eee; margin-top: 20px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #eee; position: sticky; top: 0; padding: 12px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
-        #adminArea { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ddd; }
+        #content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; color: white; background: var(--accent); }
+        .page { display: none; }
+        .active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div id="loginArea">
-        <h2>Karibu ZU Portal</h2>
-        <input type="email" id="email" placeholder="Email ya Mwanafunzi">
+<div id="sidebar">
+    <h3><i class="fa fa-university"></i> ZU Portal</h3>
+    <a onclick="show('dashboard')"><i class="fa fa-home"></i> Dashboard</a>
+    <a onclick="show('attendance')"><i class="fa fa-check-circle"></i> Mahudhurio</a>
+    <a onclick="show('profile')"><i class="fa fa-user"></i> Profile</a>
+    <a onclick="logout()"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+
+<div id="content">
+    <div id="loginPage" class="card active">
+        <h2><i class="fa fa-lock"></i> Ingia</h2>
+        <input type="email" id="email" placeholder="Email (mfano: student@zu.ac.tz)">
         <input type="password" id="password" placeholder="Password">
-        <button class="btn-primary" onclick="login()">Ingia Sasa</button>
-        <button class="btn-primary" style="background:#6c757d;" onclick="signup()">Jisajili Mwanafunzi</button>
+        <button onclick="login()">Login</button>
     </div>
 
-    <div id="appArea">
-        <h2>Mahudhurio</h2>
+    <div id="dashboard" class="page">
+        <h2>Dashboard</h2>
+        <p>Karibu mwanafunzi kwenye mfumo wa mahudhurio ya ZU.</p>
+    </div>
+
+    <div id="attendance" class="page card">
+        <h2>Hifadhi Mahudhurio</h2>
         <input type="text" id="name" placeholder="Jina Kamili">
-        <input type="text" id="regNo" placeholder="Namba ya Usajili">
-        <button id="submitBtn" class="btn-success">Hifadhi Mahudhurio</button>
-        <button class="btn-danger" onclick="logout()">Toka (Logout)</button>
-        <p id="message" style="text-align:center; font-weight:bold;"></p>
-
-        <div id="tableContainer">
-            <table>
-                <thead><tr><th>Jina</th><th>Namba</th><th>Muda</th></tr></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <div id="adminArea">
-            <h4>Admin Control</h4>
-            <input type="password" id="adminPass" placeholder="Admin Password">
-            <button class="btn-primary" onclick="downloadCSV()">Download Ripoti (CSV)</button>
-            <button class="btn-danger" onclick="clearData()">Futa Data Zote</button>
-        </div>
+        <input type="text" id="regNo" placeholder="Namba ya Usajili (mfano: BIT/2026/001)">
+        <button onclick="saveAttendance()" class="btn-success">Hifadhi</button>
     </div>
 </div>
 
@@ -69,91 +57,46 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
 <script>
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(() => console.log('Service Worker Registered'));
+    // Config...
+    const firebaseConfig = { /* Weka config yako hapa */ };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth(); const db = firebase.database();
+
+    function show(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(page).classList.add('active');
     }
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
-      authDomain: "attendancesystem-ecd0a.firebaseapp.com",
-      databaseURL: "https://attendancesystem-ecd0a-default-rtdb.firebaseio.com",
-      projectId: "attendancesystem-ecd0a",
-      storageBucket: "attendancesystem-ecd0a.firebasestorage.app",
-      messagingSenderId: "505261139314",
-      appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            document.getElementById('loginArea').style.display = "none";
-            document.getElementById('appArea').style.display = "block";
-            loadData();
-        } else {
-            document.getElementById('loginArea').style.display = "block";
-            document.getElementById('appArea').style.display = "none";
-        }
-    });
-
-    function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(e => alert(e.message)); }
-    function signup() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(e => alert(e.message)); }
-    function logout() { auth.signOut(); }
-
-    document.getElementById('submitBtn').addEventListener('click', () => {
-        const n = document.getElementById('name').value;
-        const r = document.getElementById('regNo').value;
-        if(!n || !r) return alert("Tafadhali jaza taarifa zote!");
-
-        navigator.geolocation.getCurrentPosition(pos => {
-            const d = getDist(pos.coords.latitude, pos.coords.longitude, -6.225432, 39.311248);
-            if(d <= 2.0) {
-                db.ref('attendance/').push({ jina: n, namba: r, muda: new Date().toLocaleString() });
-                document.getElementById('message').innerText = "✅ Imefanikiwa!";
-            } else {
-                document.getElementById('message').innerText = "❌ Upo nje ya eneo la Chuo.";
-            }
-        }, () => alert("Tafadhali washa GPS yako!"), {enableHighAccuracy: true});
-    });
-
-    function loadData() {
-        db.ref('attendance/').on('value', (s) => {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = "";
-            s.forEach((c) => {
-                const d = c.val();
-                body.innerHTML += `<tr><td>${d.jina}</td><td>${d.namba}</td><td>${d.muda}</td></tr>`;
-            });
+    function login() {
+        const email = document.getElementById('email').value;
+        if(!email.endsWith('@zu.ac.tz')) return alert("Tumia email ya chuo!");
+        auth.signInWithEmailAndPassword(email, document.getElementById('password').value)
+        .then(() => {
+            document.getElementById('sidebar').style.display = 'block';
+            document.getElementById('loginPage').style.display = 'none';
+            show('dashboard');
         });
     }
 
-    function clearData() {
-        if(document.getElementById('adminPass').value === "admin123") {
-            db.ref('attendance/').remove().then(() => alert("Data zimefutwa!"));
-        } else { alert("Password si sahihi!"); }
-    }
-
-    function downloadCSV() {
-        if(document.getElementById('adminPass').value !== "admin123") return alert("Password si sahihi!");
-        let csv = "Jina,Namba,Muda\n";
-        db.ref('attendance/').once('value', s => {
-            s.forEach(c => { const d = c.val(); csv += `${d.jina},${d.namba},${d.muda}\n`; });
-            const a = document.createElement('a');
-            a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-            a.download = 'Ripoti.csv';
-            a.click();
+    function saveAttendance() {
+        const reg = document.getElementById('regNo').value;
+        if(!/^[A-Z]{3}\/\d{4}\/\d{3}$/.test(reg)) return alert("Namba ya usajili si sahihi! (Format: BIT/2026/001)");
+        
+        navigator.geolocation.getCurrentPosition(pos => {
+            const d = getDist(pos.coords.latitude, pos.coords.longitude, -6.225432, 39.311248);
+            if(d <= 2.0) {
+                db.ref('attendance/' + auth.currentUser.uid).set({
+                    jina: document.getElementById('name').value,
+                    namba: reg,
+                    muda: new Date().toLocaleString()
+                });
+                alert("Mahudhurio yamehifadhiwa!");
+            } else alert("Upo nje ya eneo!");
         });
     }
 
     function getDist(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2-lat1) * Math.PI/180;
-        const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        // ... (Function yako ya geofence)
     }
 </script>
 </body>
