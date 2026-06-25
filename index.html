@@ -1,60 +1,9 @@
-<!DOCTYPE html>
-<html lang="sw">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZU Attendance Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --primary: #0056b3; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; }
-        #sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: none; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin: auto; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .page { display: none; } .active { display: block; }
-    </style>
-</head>
-<body>
-
-<div id="sidebar">
-    <h3><i class="fa fa-university"></i> ZU Portal</h3>
-    <a onclick="show('dashboard')" style="display:block; padding:10px; color:white; cursor:pointer;">Dashboard</a>
-    <a onclick="logout()" style="display:block; padding:10px; color:white; cursor:pointer;">Logout</a>
-</div>
-
-<div id="main" style="flex-grow:1; padding:20px;">
-    <div id="loginPage" class="card active">
-        <h2>Ingia</h2>
-        <input type="email" id="logEmail" placeholder="Email">
-        <input type="password" id="logPass" placeholder="Password">
-        <button onclick="loginUser()">Ingia</button>
-        <p>Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer;">Jisajili hapa</span></p>
-    </div>
-
-    <div id="signupPage" class="card page">
-        <h2>Jisajili</h2>
-        <input type="text" id="regNo" placeholder="Namba ya Usajili (BIT/2026/001)">
-        <input type="tel" id="phone" placeholder="Namba ya Simu">
-        <input type="email" id="signEmail" placeholder="Email">
-        <input type="password" id="signPass" placeholder="Password">
-        <button onclick="signupUser()">Jisajili</button>
-        <p><span onclick="show('loginPage')" style="color:blue; cursor:pointer;">Rudi Login</span></p>
-    </div>
-
-    <div id="dashboard" class="page card" style="max-width:800px;">
-        <h2>Dashboard</h2>
-        <input type="text" id="attendName" placeholder="Jina Kamili">
-        <button onclick="submitAttendance()" style="background:green;">Hifadhi Mahudhurio</button>
-    </div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
 <script>
-    // 1. CONFIGURATION
+    // 1. Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
       authDomain: "attendancesystem-ecd0a.firebaseapp.com",
@@ -65,48 +14,40 @@
       appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
     };
 
-    // 2. INITIALIZE FIREBASE (MUHIMU: HII LAZIMA IWE JUU YA ZOTE)
-    firebase.initializeApp(firebaseConfig);
+    // 2. Initialize Firebase kwanza kabisa
+    const app = firebase.initializeApp(firebaseConfig);
 
-    // 3. TANGAZA VARIABLE BAADA YA INITIALIZATION
-    const auth = firebase.auth();
-    const db = firebase.database();
+    // 3. Hakikisha auth na db zinatumia ile 'app' iliyo-initializewa
+    const auth = app.auth();
+    const db = app.database();
 
-    function show(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    // Sasa unaweza kuzitumia bila kupata kosa hilo
+    function loginUser() {
+        const email = document.getElementById('logEmail').value;
+        const pass = document.getElementById('logPass').value;
+        
+        auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+            document.getElementById('sidebar').style.display = 'block';
+            show('dashboard');
+        })
+        .catch(e => alert(e.message));
     }
 
-    // SIGNUP
-    async function signupUser() {
+    function signupUser() {
         const email = document.getElementById('signEmail').value;
         const pass = document.getElementById('signPass').value;
         const reg = document.getElementById('regNo').value;
         const phone = document.getElementById('phone').value;
 
-        try {
-            const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-            await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone });
+        auth.createUserWithEmailAndPassword(email, pass)
+        .then((userCred) => {
+            db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone });
             alert("Usajili umefanikiwa!");
             show('loginPage');
-        } catch(e) { alert(e.message); }
+        })
+        .catch(e => alert(e.message));
     }
-
-    // LOGIN
-    function loginUser() {
-        const email = document.getElementById('logEmail').value;
-        const pass = document.getElementById('logPass').value;
-        auth.signInWithEmailAndPassword(email, pass).then(userCred => {
-            document.getElementById('sidebar').style.display = 'block';
-            show('dashboard');
-        }).catch(e => alert(e.message));
-    }
-
-    function logout() { auth.signOut().then(() => location.reload()); }
-
-    function submitAttendance() {
-        alert("Mahudhurio yamehifadhiwa kwa akaunti yako!");
-    }
+    
+    // ... endelea na functions nyingine hapa chini
 </script>
-</body>
-</html>
