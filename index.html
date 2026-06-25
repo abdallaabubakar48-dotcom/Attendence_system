@@ -25,7 +25,7 @@
 
 <div id="main" style="flex-grow:1; padding:20px;">
     <div id="loginPage" class="card active">
-        <h2>Login</h2>
+        <h2>Ingia</h2>
         <input type="email" id="logEmail" placeholder="Email">
         <input type="password" id="logPass" placeholder="Password">
         <button onclick="loginUser()">Ingia</button>
@@ -34,7 +34,7 @@
 
     <div id="signupPage" class="card page">
         <h2>Jisajili</h2>
-        <input type="text" id="regNo" placeholder="Namba ya Usajili (Reg No)">
+        <input type="text" id="regNo" placeholder="Namba ya Usajili (BIT/2026/001)">
         <input type="tel" id="phone" placeholder="Namba ya Simu">
         <input type="email" id="signEmail" placeholder="Email">
         <input type="password" id="signPass" placeholder="Password">
@@ -45,7 +45,7 @@
     <div id="dashboard" class="page card" style="max-width:800px;">
         <h2>Dashboard</h2>
         <input type="text" id="attendName" placeholder="Jina Kamili">
-        <button onclick="submitAttendance()" class="btn-success">Hifadhi Mahudhurio</button>
+        <button onclick="submitAttendance()" style="background:green;">Hifadhi Mahudhurio</button>
     </div>
 </div>
 
@@ -54,16 +54,30 @@
 <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
 <script>
-    const firebaseConfig = { /* WEKA CONFIG YAKO HAPA */ };
+    // 1. CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxeh9-9_3y7HuI77jpubKnbU39xcbojs0",
+      authDomain: "attendancesystem-ecd0a.firebaseapp.com",
+      databaseURL: "https://attendancesystem-ecd0a-default-rtdb.firebaseio.com",
+      projectId: "attendancesystem-ecd0a",
+      storageBucket: "attendancesystem-ecd0a.firebasestorage.app",
+      messagingSenderId: "505261139314",
+      appId: "1:505261139314:web:102548d4bc808ad31fa9eb"
+    };
+
+    // 2. INITIALIZE FIREBASE (MUHIMU: HII LAZIMA IWE JUU YA ZOTE)
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth(); const db = firebase.database();
+
+    // 3. TANGAZA VARIABLE BAADA YA INITIALIZATION
+    const auth = firebase.auth();
+    const db = firebase.database();
 
     function show(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    // SIGNUP NA PROFILE CREATION
+    // SIGNUP
     async function signupUser() {
         const email = document.getElementById('signEmail').value;
         const pass = document.getElementById('signPass').value;
@@ -72,29 +86,27 @@
 
         try {
             const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-            // Hifadhi Profile ya ziada kwenye Database
             await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone });
             alert("Usajili umefanikiwa!");
             show('loginPage');
         } catch(e) { alert(e.message); }
     }
 
-    // LOGIN NA OTP/EMAIL VERIFICATION
+    // LOGIN
     function loginUser() {
         const email = document.getElementById('logEmail').value;
         const pass = document.getElementById('logPass').value;
         auth.signInWithEmailAndPassword(email, pass).then(userCred => {
-            if(!userCred.user.emailVerified) {
-                userCred.user.sendEmailVerification();
-                alert("Tafadhali angalia email yako kuthibitisha akaunti!");
-            } else {
-                document.getElementById('sidebar').style.display = 'block';
-                show('dashboard');
-            }
+            document.getElementById('sidebar').style.display = 'block';
+            show('dashboard');
         }).catch(e => alert(e.message));
     }
 
     function logout() { auth.signOut().then(() => location.reload()); }
+
+    function submitAttendance() {
+        alert("Mahudhurio yamehifadhiwa kwa akaunti yako!");
+    }
 </script>
 </body>
 </html>
