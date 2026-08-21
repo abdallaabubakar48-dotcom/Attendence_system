@@ -6,48 +6,101 @@
     <title>ZU Attendance Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #0056b3; --sidebar: #2c3e50; }
+        :root { --primary: #0056b3; --sidebar: #2c3e50; --success: #28a745; --danger: #dc3545; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; }
-        #sidebar { width: 250px; background: var(--sidebar); color: white; padding: 20px; display: none; }
-        #sidebar a { display: block; color: white; padding: 15px; text-decoration: none; cursor: pointer; }
-        #content { flex-grow: 1; padding: 30px; display: flex; justify-content: center; align-items: center; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        
+        #sidebar { width: 260px; background: var(--sidebar); color: white; display: none; overflow-y: auto; }
+        .sidebar-brand { padding: 20px; font-size: 1.2em; font-weight: bold; background: #1a252f; text-align: center; }
+        .menu-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #34495e; display: flex; align-items: center; justify-content: space-between; }
+        .menu-item:hover { background: #34495e; }
+        .dropdown { background: #1a252f; display: none; padding-left: 15px; }
+        .dropdown .menu-item { border: none; padding: 12px 20px; font-size: 0.9em; }
+
+        #content { flex-grow: 1; padding: 30px; display: flex; justify-content: center; align-items: center; overflow-y: auto; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .page { display: none; } .active { display: block; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        
+        .page { display: none; } 
+        .active { display: block; }
+        #loginContent { display: flex; width: 100%; height: 100%; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
+<!-- SIDEBAR -->
 <div id="sidebar">
-    <h3><i class="fa fa-university"></i> ZU Portal</h3>
-    <a onclick="show('dashboard')"><i class="fa fa-home"></i> Dashboard</a>
-    <a onclick="logout()"><i class="fa fa-sign-out"></i> Logout</a>
-</div>
-
-<div id="content">
-    <div id="loginPage" class="card active page">
-        <h2>Login</h2>
-        <input type="email" id="logEmail" placeholder="Email">
-        <input type="password" id="logPass" placeholder="Password">
-        <button onclick="loginUser()">Ingia</button>
-        <p>Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer;">Jisajili</span></p>
+    <div class="sidebar-brand"><i class="fa fa-university"></i> ZU Portal</div>
+    
+    <!-- Student Menu Dropdown -->
+    <div class="menu-item" onclick="toggleDrop('studentDrop')">
+        <span><i class="fa fa-user-graduate"></i> Mwanafunzi</span>
+        <i class="fa fa-chevron-down"></i>
+    </div>
+    <div id="studentDrop" class="dropdown">
+        <div class="menu-item" onclick="show('dashboard')"><i class="fa fa-clipboard-check"></i> Weka Mahudhurio</div>
+        <div class="menu-item" onclick="show('profilePage')"><i class="fa fa-id-card"></i> Profile & Picha</div>
     </div>
 
+    <!-- Admin Menu Dropdown -->
+    <div class="menu-item" onclick="toggleDrop('adminDrop')">
+        <span><i class="fa fa-shield-alt"></i> Admin</span>
+        <i class="fa fa-chevron-down"></i>
+    </div>
+    <div id="adminDrop" class="dropdown">
+        <div class="menu-item" onclick="downloadCSV()"><i class="fa fa-download"></i> Download Ripoti</div>
+        <div class="menu-item" onclick="show('settingsPage')"><i class="fa fa-key"></i> Badili Password</div>
+    </div>
+
+    <div class="menu-item" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="content">
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="card active page" style="display:block;">
+        <h2>Ingia kwenye Mfumo</h2>
+        <input type="email" id="logEmail" placeholder="Email ya Mwanafunzi">
+        <input type="password" id="logPass" placeholder="Password">
+        <button onclick="loginUser()">Ingia Sasa</button>
+        <p style="text-align: center; margin-top: 15px;">Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer; font-weight:bold;">Jisajili</span></p>
+    </div>
+
+    <!-- SIGNUP PAGE -->
     <div id="signupPage" class="card page">
-        <h2>Jisajili</h2>
-        <input type="text" id="regNo" placeholder="Reg No (e.g. BIT/2026/001)">
+        <h2>Jisajili Mwanafunzi</h2>
+        <input type="text" id="regNo" placeholder="Namba ya Usajili (mfano: BIT/2026/001)">
         <input type="tel" id="phone" placeholder="Namba ya Simu">
         <input type="email" id="signEmail" placeholder="Email">
         <input type="password" id="signPass" placeholder="Password">
-        <button onclick="signupUser()">Jisajili</button>
-        <p><span onclick="show('loginPage')" style="color:blue; cursor:pointer;">Rudi Login</span></p>
+        <button onclick="signupUser()"> Kamilisha Usajili </button>
+        <p style="text-align: center; margin-top: 15px;"><span onclick="show('loginPage')" style="color:blue; cursor:pointer; font-weight:bold;">Rudi Login</span></p>
     </div>
 
+    <!-- DASHBOARD / ATTENDANCE PAGE -->
     <div id="dashboard" class="card page">
-        <h2>Karibu Mwanafunzi</h2>
+        <h2>Weka Mahudhurio</h2>
+        <p style="font-size: 0.9em; color: #666;">Hakikisha upo ndani ya eneo la chuo (ZU Geofence).</p>
         <input type="text" id="attendName" placeholder="Jina Kamili">
-        <button onclick="submitAttendance()" style="background:green;">Hifadhi Mahudhurio</button>
+        <input type="text" id="attendReg" placeholder="Namba ya Usajili (Reg No)">
+        <button onclick="submitAttendance()" style="background: var(--success);">Hifadhi Mahudhurio</button>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="profilePage" class="card page">
+        <h2>Profile Yako</h2>
+        <input type="text" id="profileName" placeholder="Jina Lako" disabled>
+        <input type="text" id="profileReg" placeholder="Reg No" disabled>
+        <p style="margin: 10px 0 5px 0; font-size: 0.9em;">Weka picha yako ya utambulisho:</p>
+        <input type="file" id="profileImageFile" accept="image/*">
+        <button onclick="alert('Picha imehifadhiwa!')">Sasisha Picha</button>
+    </div>
+
+    <!-- SETTINGS PAGE (CHANGE PASSWORD) -->
+    <div id="settingsPage" class="card page">
+        <h2>Badili Password</h2>
+        <input type="password" id="newPass" placeholder="Password Mpya">
+        <button onclick="changePassword()" style="background: var(--danger);">Badili Sasa</button>
     </div>
 </div>
 
@@ -75,12 +128,18 @@
         document.getElementById(id).classList.add('active');
     }
 
+    function toggleDrop(id) {
+        let el = document.getElementById(id);
+        el.style.display = el.style.display === "block" ? "none" : "block";
+    }
+
     async function signupUser() {
         try {
             const email = document.getElementById('signEmail').value;
             const pass = document.getElementById('signPass').value;
             const reg = document.getElementById('regNo').value;
             const phone = document.getElementById('phone').value;
+            
             const userCred = await auth.createUserWithEmailAndPassword(email, pass);
             await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone });
             alert("Usajili umefanikiwa!");
@@ -98,7 +157,57 @@
 
     function logout() { auth.signOut().then(() => location.reload()); }
 
-    function submitAttendance() { alert("Mahudhurio yamehifadhiwa!"); }
+    // GEOFENCE NA ATTENDANCE
+    function submitAttendance() {
+        const name = document.getElementById('attendName').value;
+        const reg = document.getElementById('attendReg').value;
+        if(!name || !reg) return alert("Tafadhali jaza jina na namba ya usajili!");
+
+        navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            // Eneo la ZU (Coordinates za Chuo)
+            const d = getDist(lat, lon, -6.225432, 39.311248);
+            
+            if(d <= 2.0) { // Ndani ya kilomita 2 (au badili iwe mita unazotaka)
+                db.ref('attendance/').push({
+                    jina: name,
+                    namba: reg,
+                    muda: new Date().toLocaleString()
+                });
+                alert("✅ Mahudhurio yamehifadhiwa kikamilifu!");
+            } else {
+                alert("❌ Imekataliwa: Upo nje ya eneo la Chuo (Geofence violation).");
+            }
+        }, () => alert("Tafadhali ruhusu GPS/Location kwenye kifaa chako!"), {enableHighAccuracy: true});
+    }
+
+    function getDist(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function changePassword() {
+        const newP = document.getElementById('newPass').value;
+        if(!newP) return alert("Andika password mpya!");
+        auth.currentUser.updatePassword(newP).then(() => {
+            alert("Password imebadilishwa mafanikio!");
+        }).catch(e => alert(e.message));
+    }
+
+    function downloadCSV() {
+        let csv = "Jina,Namba,Muda\n";
+        db.ref('attendance/').once('value', s => {
+            s.forEach(c => { const d = c.val(); csv += `${d.jina},${d.namba},${d.muda}\n`; });
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            a.download = 'Ripoti_Ya_Mahudhurio.csv';
+            a.click();
+        });
+    }
 </script>
 </body>
 </html>
