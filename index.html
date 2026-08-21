@@ -167,7 +167,7 @@
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             // Eneo la ZU (Coordinates za Chuo)
-            const d = getDist(lat, lon, -6.225432, 39.311248);
+            const d = getDist(lat, lon, -6.193839, 39.293476);
             
             if(d <= 2.0) { // Ndani ya kilomita 2 (au badili iwe mita unazotaka)
                 db.ref('attendance/').push({
