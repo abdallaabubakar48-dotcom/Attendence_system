@@ -23,7 +23,6 @@
         
         .page { display: none; } 
         .active { display: block; }
-        #loginContent { display: flex; width: 100%; height: 100%; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
@@ -58,7 +57,7 @@
 <!-- MAIN CONTENT -->
 <div id="content">
     <!-- LOGIN PAGE -->
-    <div id="loginPage" class="card active page" style="display:block;">
+    <div id="loginPage" class="card active page">
         <h2>Ingia kwenye Mfumo</h2>
         <input type="email" id="logEmail" placeholder="Email ya Mwanafunzi">
         <input type="password" id="logPass" placeholder="Password">
@@ -169,7 +168,7 @@
             // Eneo la ZU (Coordinates za Chuo)
             const d = getDist(lat, lon, -6.193839, 39.293476);
             
-            if(d <= 500.0) { // Ndani ya kilomita 2 (au badili iwe mita unazotaka)
+            if(d <= 500.0) { 
                 db.ref('attendance/').push({
                     jina: name,
                     namba: reg,
