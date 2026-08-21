@@ -7,14 +7,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #0056b3; --sidebar: #2c3e50; --success: #28a745; --danger: #dc3545; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        #sidebar { width: 260px; background: var(--sidebar); color: white; display: none; overflow-y: auto; }
+        #sidebar { width: 260px; background: var(--sidebar); color: white; display: none; overflow-y: auto; flex-shrink: 0; }
         .sidebar-brand { padding: 20px; font-size: 1.2em; font-weight: bold; background: #1a252f; text-align: center; }
         .menu-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #34495e; display: flex; align-items: center; justify-content: space-between; }
         .menu-item:hover { background: #34495e; }
         .dropdown { background: #1a252f; display: none; padding-left: 15px; }
         .dropdown .menu-item { border: none; padding: 12px 20px; font-size: 0.9em; }
+
+        #main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* Top Bar kwa ajili ya picha, badili password na logout mkono wa kulia */
+        #topbar { height: 60px; background: white; border-bottom: 1px solid #ddd; display: none; justify-content: flex-end; align-items: center; padding: 0 20px; gap: 20px; }
+        .user-profile-section { display: flex; align-items: center; gap: 10px; }
+        .user-profile-section img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .topbar-btn { background: none; border: none; cursor: pointer; font-weight: 600; color: #333; display: flex; align-items: center; gap: 5px; padding: 8px 12px; border-radius: 5px; width: auto; margin: 0; }
+        .topbar-btn:hover { background: #f1f1f1; }
+        .topbar-btn.logout-btn { color: var(--danger); }
 
         #content { flex-grow: 1; padding: 30px; display: flex; justify-content: center; align-items: center; overflow-y: auto; }
         .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
@@ -48,58 +58,71 @@
     </div>
     <div id="adminDrop" class="dropdown">
         <div class="menu-item" onclick="downloadCSV()"><i class="fa fa-download"></i> Download Ripoti</div>
-        <div class="menu-item" onclick="show('settingsPage')"><i class="fa fa-key"></i> Badili Password</div>
     </div>
-
-    <div class="menu-item" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</div>
 </div>
 
-<!-- MAIN CONTENT -->
-<div id="content">
-    <!-- LOGIN PAGE -->
-    <div id="loginPage" class="card active page">
-        <h2>Ingia kwenye Mfumo</h2>
-        <input type="email" id="logEmail" placeholder="Email ya Mwanafunzi">
-        <input type="password" id="logPass" placeholder="Password">
-        <button onclick="loginUser()">Ingia Sasa</button>
-        <p style="text-align: center; margin-top: 15px;">Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer; font-weight:bold;">Jisajili</span></p>
+<!-- MAIN CONTAINER (TOPBAR + CONTENT) -->
+<div id="main-container">
+    <!-- TOPBAR (Picha, Badili Password, Logout upande wa kulia) -->
+    <div id="topbar">
+        <div class="user-profile-section">
+            <img id="topUserImg" src="https://via.placeholder.com/40" alt="Picha ya Mtumiaji">
+            <span id="topUserName" style="font-weight: 600; font-size: 0.9em; color: #333;">Mwanafunzi</span>
+        </div>
+        <button class="topbar-btn" onclick="show('settingsPage')"><i class="fa fa-key"></i> Badili Password</button>
+        <button class="topbar-btn logout-btn" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</button>
     </div>
 
-    <!-- SIGNUP PAGE -->
-    <div id="signupPage" class="card page">
-        <h2>Jisajili Mwanafunzi</h2>
-        <input type="text" id="regNo" placeholder="Namba ya Usajili (mfano: BIT/2026/001)">
-        <input type="tel" id="phone" placeholder="Namba ya Simu">
-        <input type="email" id="signEmail" placeholder="Email">
-        <input type="password" id="signPass" placeholder="Password">
-        <button onclick="signupUser()"> Kamilisha Usajili </button>
-        <p style="text-align: center; margin-top: 15px;"><span onclick="show('loginPage')" style="color:blue; cursor:pointer; font-weight:bold;">Rudi Login</span></p>
-    </div>
+    <!-- MAIN CONTENT -->
+    <div id="content">
+        <!-- LOGIN PAGE -->
+        <div id="loginPage" class="card active page">
+            <h2>Ingia kwenye Mfumo</h2>
+            <input type="email" id="logEmail" placeholder="Email ya Mwanafunzi">
+            <input type="password" id="logPass" placeholder="Password">
+            <button onclick="loginUser()">Ingia Sasa</button>
+            <p style="text-align: center; margin-top: 15px;">Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer; font-weight:bold;">Jisajili</span></p>
+        </div>
 
-    <!-- DASHBOARD / ATTENDANCE PAGE -->
-    <div id="dashboard" class="card page">
-        <h2>Weka Mahudhurio</h2>
-        <p style="font-size: 0.9em; color: #666;">Hakikisha upo ndani ya eneo la chuo (ZU Geofence).</p>
-        <input type="text" id="attendName" placeholder="Jina Kamili">
-        <input type="text" id="attendReg" placeholder="Namba ya Usajili (Reg No)">
-        <button onclick="submitAttendance()" style="background: var(--success);">Hifadhi Mahudhurio</button>
-    </div>
+        <!-- SIGNUP PAGE -->
+        <div id="signupPage" class="card page">
+            <h2>Jisajili Mwanafunzi</h2>
+            <input type="text" id="regNo" placeholder="Namba ya Usajili (mfano: BIT/2026/001)">
+            <input type="tel" id="phone" placeholder="Namba ya Simu">
+            <input type="email" id="signEmail" placeholder="Email">
+            <input type="password" id="signPass" placeholder="Password">
+            <button onclick="signupUser()"> Kamilisha Usajili </button>
+            <p style="text-align: center; margin-top: 15px;"><span onclick="show('loginPage')" style="color:blue; cursor:pointer; font-weight:bold;">Rudi Login</span></p>
+        </div>
 
-    <!-- PROFILE PAGE -->
-    <div id="profilePage" class="card page">
-        <h2>Profile Yako</h2>
-        <input type="text" id="profileName" placeholder="Jina Lako" disabled>
-        <input type="text" id="profileReg" placeholder="Reg No" disabled>
-        <p style="margin: 10px 0 5px 0; font-size: 0.9em;">Weka picha yako ya utambulisho:</p>
-        <input type="file" id="profileImageFile" accept="image/*">
-        <button onclick="alert('Picha imehifadhiwa!')">Sasisha Picha</button>
-    </div>
+        <!-- DASHBOARD / ATTENDANCE PAGE -->
+        <div id="dashboard" class="card page">
+            <h2>Weka Mahudhurio</h2>
+            <p style="font-size: 0.9em; color: #666;">Hakikisha upo ndani ya eneo la chuo (ZU Geofence).</p>
+            <input type="text" id="attendName" placeholder="Jina Kamili">
+            <input type="text" id="attendReg" placeholder="Namba ya Usajili (Reg No)">
+            <button onclick="submitAttendance()" style="background: var(--success);">Hifadhi Mahudhurio</button>
+        </div>
 
-    <!-- SETTINGS PAGE (CHANGE PASSWORD) -->
-    <div id="settingsPage" class="card page">
-        <h2>Badili Password</h2>
-        <input type="password" id="newPass" placeholder="Password Mpya">
-        <button onclick="changePassword()" style="background: var(--danger);">Badili Sasa</button>
+        <!-- PROFILE PAGE -->
+        <div id="profilePage" class="card page">
+            <h2>Profile Yako</h2>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img id="profilePreview" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);" alt="Profile">
+            </div>
+            <input type="text" id="profileName" placeholder="Jina Lako">
+            <input type="text" id="profileReg" placeholder="Reg No">
+            <p style="margin: 10px 0 5px 0; font-size: 0.9em;">Weka picha yako ya utambulisho:</p>
+            <input type="file" id="profileImageFile" accept="image/*" onchange="previewProfileImage(event)">
+            <button onclick="saveProfile()">Sasisha Profile</button>
+        </div>
+
+        <!-- SETTINGS PAGE (CHANGE PASSWORD) -->
+        <div id="settingsPage" class="card page">
+            <h2>Badili Password</h2>
+            <input type="password" id="newPass" placeholder="Password Mpya">
+            <button onclick="changePassword()" style="background: var(--danger);">Badili Sasa</button>
+        </div>
     </div>
 </div>
 
@@ -140,7 +163,7 @@
             const phone = document.getElementById('phone').value;
             
             const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-            await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone });
+            await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone, name: reg });
             alert("Usajili umefanikiwa!");
             show('loginPage');
         } catch(e) { alert(e.message); }
@@ -148,9 +171,53 @@
 
     function loginUser() {
         auth.signInWithEmailAndPassword(document.getElementById('logEmail').value, document.getElementById('logPass').value)
-        .then(() => {
+        .then((userCred) => {
             document.getElementById('sidebar').style.display = 'block';
+            document.getElementById('topbar').style.display = 'flex';
+            loadUserData(userCred.user.uid);
             show('dashboard');
+        }).catch(e => alert(e.message));
+    }
+
+    function loadUserData(uid) {
+        db.ref('users/' + uid).on('value', snapshot => {
+            const data = snapshot.val();
+            if(data) {
+                if(data.name) {
+                    document.getElementById('topUserName').innerText = data.name;
+                    document.getElementById('profileName').value = data.name;
+                }
+                if(data.regNo) {
+                    document.getElementById('profileReg').value = data.regNo;
+                    document.getElementById('attendReg').value = data.regNo;
+                }
+                if(data.photo) {
+                    document.getElementById('topUserImg').src = data.photo;
+                    document.getElementById('profilePreview').src = data.photo;
+                }
+            }
+        });
+    }
+
+    function previewProfileImage(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            document.getElementById('profilePreview').src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function saveProfile() {
+        const user = auth.currentUser;
+        if(!user) return;
+        const name = document.getElementById('profileName').value;
+        const photoSrc = document.getElementById('profilePreview').src;
+
+        db.ref('users/' + user.uid).update({
+            name: name,
+            photo: photoSrc
+        }).then(() => {
+            alert("Profile imesasishwa mafanikio!");
         }).catch(e => alert(e.message));
     }
 
