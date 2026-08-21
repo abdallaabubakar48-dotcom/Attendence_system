@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZU Attendance Pro</title>
+    <title>ZU Attendance Pro - Professional Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #0056b3; --sidebar: #2c3e50; --success: #28a745; --danger: #dc3545; }
+        :root { --primary: #0056b3; --sidebar: #2c3e50; --success: #28a745; --danger: #dc3545; --warning: #ffc107; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         #sidebar { width: 260px; background: var(--sidebar); color: white; display: none; overflow-y: auto; flex-shrink: 0; }
@@ -17,8 +17,6 @@
         .dropdown .menu-item { border: none; padding: 12px 20px; font-size: 0.9em; }
 
         #main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-        /* Top Bar kwa ajili ya picha, badili password na logout mkono wa kulia */
         #topbar { height: 60px; background: white; border-bottom: 1px solid #ddd; display: none; justify-content: flex-end; align-items: center; padding: 0 20px; gap: 20px; }
         .user-profile-section { display: flex; align-items: center; gap: 10px; }
         .user-profile-section img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
@@ -27,9 +25,10 @@
         .topbar-btn.logout-btn { color: var(--danger); }
 
         #content { flex-grow: 1; padding: 30px; display: flex; justify-content: center; align-items: center; overflow-y: auto; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        button:hover { opacity: 0.9; }
         
         .page { display: none; } 
         .active { display: block; }
@@ -41,44 +40,59 @@
 <div id="sidebar">
     <div class="sidebar-brand"><i class="fa fa-university"></i> ZU Portal</div>
     
-    <!-- Student Menu Dropdown -->
-    <div class="menu-item" onclick="toggleDrop('studentDrop')">
-        <span><i class="fa fa-user-graduate"></i> Mwanafunzi</span>
-        <i class="fa fa-chevron-down"></i>
-    </div>
-    <div id="studentDrop" class="dropdown">
-        <div class="menu-item" onclick="show('dashboard')"><i class="fa fa-clipboard-check"></i> Weka Mahudhurio</div>
-        <div class="menu-item" onclick="show('profilePage')"><i class="fa fa-id-card"></i> Profile & Picha</div>
+    <!-- Student Menu -->
+    <div id="menuStudent" style="display:none;">
+        <div class="menu-item" onclick="toggleDrop('studentDrop')">
+            <span><i class="fa fa-user-graduate"></i> Mwanafunzi</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div id="studentDrop" class="dropdown">
+            <div class="menu-item" onclick="show('dashboardStudent')"><i class="fa fa-clipboard-check"></i> Weka Mahudhurio</div>
+            <div class="menu-item" onclick="show('profilePage')"><i class="fa fa-id-card"></i> Profile & Picha</div>
+        </div>
     </div>
 
-    <!-- Admin Menu Dropdown -->
-    <div class="menu-item" onclick="toggleDrop('adminDrop')">
-        <span><i class="fa fa-shield-alt"></i> Admin</span>
-        <i class="fa fa-chevron-down"></i>
+    <!-- Teacher Menu -->
+    <div id="menuTeacher" style="display:none;">
+        <div class="menu-item" onclick="toggleDrop('teacherDrop')">
+            <span><i class="fa fa-chalkboard-teacher"></i> Mwalimu</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div id="teacherDrop" class="dropdown">
+            <div class="menu-item" onclick="show('dashboardTeacher')"><i class="fa fa-plus-circle"></i> Tengeneza Kipindi</div>
+            <div class="menu-item" onclick="downloadTeacherCSV()"><i class="fa fa-download"></i> Ripoti ya Mahudhurio</div>
+        </div>
     </div>
-    <div id="adminDrop" class="dropdown">
-        <div class="menu-item" onclick="downloadCSV()"><i class="fa fa-download"></i> Download Ripoti</div>
+
+    <!-- Admin Menu -->
+    <div id="menuAdmin" style="display:none;">
+        <div class="menu-item" onclick="toggleDrop('adminDrop')">
+            <span><i class="fa fa-shield-alt"></i> Admin</span>
+            <i class="fa fa-chevron-down"></i>
+        </div>
+        <div id="adminDrop" class="dropdown">
+            <div class="menu-item" onclick="show('dashboardAdmin')"><i class="fa fa-users-cog"></i> Wasimamizi / Watumiaji</div>
+            <div class="menu-item" onclick="downloadCSV()"><i class="fa fa-download"></i> Download Ripoti Zote</div>
+        </div>
     </div>
 </div>
 
-<!-- MAIN CONTAINER (TOPBAR + CONTENT) -->
+<!-- MAIN CONTAINER -->
 <div id="main-container">
-    <!-- TOPBAR (Picha, Badili Password, Logout upande wa kulia) -->
     <div id="topbar">
         <div class="user-profile-section">
-            <img id="topUserImg" src="https://via.placeholder.com/40" alt="Picha ya Mtumiaji">
-            <span id="topUserName" style="font-weight: 600; font-size: 0.9em; color: #333;">Mwanafunzi</span>
+            <img id="topUserImg" src="https://via.placeholder.com/40" alt="Profile">
+            <span id="topUserName" style="font-weight: 600; font-size: 0.9em; color: #333;">Mtumiaji</span>
         </div>
         <button class="topbar-btn" onclick="show('settingsPage')"><i class="fa fa-key"></i> Badili Password</button>
         <button class="topbar-btn logout-btn" onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</button>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div id="content">
         <!-- LOGIN PAGE -->
         <div id="loginPage" class="card active page">
             <h2>Ingia kwenye Mfumo</h2>
-            <input type="email" id="logEmail" placeholder="Email ya Mwanafunzi">
+            <input type="email" id="logEmail" placeholder="Email Address">
             <input type="password" id="logPass" placeholder="Password">
             <button onclick="loginUser()">Ingia Sasa</button>
             <p style="text-align: center; margin-top: 15px;">Huna akaunti? <span onclick="show('signupPage')" style="color:blue; cursor:pointer; font-weight:bold;">Jisajili</span></p>
@@ -86,22 +100,47 @@
 
         <!-- SIGNUP PAGE -->
         <div id="signupPage" class="card page">
-            <h2>Jisajili Mwanafunzi</h2>
-            <input type="text" id="regNo" placeholder="Namba ya Usajili (mfano: BIT/2026/001)">
+            <h2>Jisajili Kwenye Mfumo</h2>
+            <input type="text" id="regNo" placeholder="Namba ya Usajili / Kitambulisho">
             <input type="tel" id="phone" placeholder="Namba ya Simu">
-            <input type="email" id="signEmail" placeholder="Email">
+            <select id="userRole">
+                <option value="student">Mwanafunzi</option>
+                <option value="teacher">Mwalimu</option>
+                <option value="admin">Admin</option>
+            </select>
+            <input type="email" id="signEmail" placeholder="Email Address">
             <input type="password" id="signPass" placeholder="Password">
-            <button onclick="signupUser()"> Kamilisha Usajili </button>
+            <button onclick="signupUser()">Kamilisha Usajili</button>
             <p style="text-align: center; margin-top: 15px;"><span onclick="show('loginPage')" style="color:blue; cursor:pointer; font-weight:bold;">Rudi Login</span></p>
         </div>
 
-        <!-- DASHBOARD / ATTENDANCE PAGE -->
-        <div id="dashboard" class="card page">
-            <h2>Weka Mahudhurio</h2>
-            <p style="font-size: 0.9em; color: #666;">Hakikisha upo ndani ya eneo la chuo (ZU Geofence).</p>
+        <!-- STUDENT DASHBOARD -->
+        <div id="dashboardStudent" class="card page">
+            <h2>Weka Mahudhurio (Mwanafunzi)</h2>
+            <p style="font-size: 0.9em; color: #666;">Chagua somo lenye kikao amilifu na uhakikishe upo ndani ya eneo la chuo.</p>
+            <select id="activeSessionsSelect">
+                <option value="">Inapakia vipindi amilifu...</option>
+            </select>
             <input type="text" id="attendName" placeholder="Jina Kamili">
-            <input type="text" id="attendReg" placeholder="Namba ya Usajili (Reg No)">
+            <input type="text" id="attendReg" placeholder="Namba ya Usajili">
             <button onclick="submitAttendance()" style="background: var(--success);">Hifadhi Mahudhurio</button>
+        </div>
+
+        <!-- TEACHER DASHBOARD -->
+        <div id="dashboardTeacher" class="card page">
+            <h2>Tengeneza Kipindi/Attendance</h2>
+            <p style="font-size: 0.9em; color: #666;">Weka taarifa za somo na muda wa mwisho wa kujaza mahudhurio.</p>
+            <input type="text" id="courseName" placeholder="Jina la Somo (mfano: Database Systems)">
+            <input type="text" id="courseCode" placeholder="Namba ya Somo (mfano: BIT 2201)">
+            <input type="datetime-local" id="expiryTime" placeholder="Muda wa Kufunga Mahudhurio">
+            <button onclick="createSession()" style="background: var(--warning); color: #000;">Tangaza Kipindi</button>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="dashboardAdmin" class="card page">
+            <h2>Admin Dashboard</h2>
+            <p style="font-size: 0.9em; color: #666;">Una uwezo wa kusimamia mifumo na kupakua ripoti zote.</p>
+            <button onclick="downloadCSV()">Download Ripoti Zote (CSV)</button>
         </div>
 
         <!-- PROFILE PAGE -->
@@ -111,7 +150,7 @@
                 <img id="profilePreview" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);" alt="Profile">
             </div>
             <input type="text" id="profileName" placeholder="Jina Lako">
-            <input type="text" id="profileReg" placeholder="Reg No">
+            <input type="text" id="profileReg" placeholder="Reg No / ID">
             <p style="margin: 10px 0 5px 0; font-size: 0.9em;">Weka picha yako ya utambulisho:</p>
             <input type="file" id="profileImageFile" accept="image/*" onchange="previewProfileImage(event)">
             <button onclick="saveProfile()">Sasisha Profile</button>
@@ -120,7 +159,7 @@
         <!-- SETTINGS PAGE (CHANGE PASSWORD) -->
         <div id="settingsPage" class="card page">
             <h2>Badili Password</h2>
-            <input type="password" id="newPass" placeholder="Password Mpya">
+            <input type="password" id="newPass" placeholder="Password Mpya (angalau tarakimu 6)">
             <button onclick="changePassword()" style="background: var(--danger);">Badili Sasa</button>
         </div>
     </div>
@@ -155,34 +194,58 @@
         el.style.display = el.style.display === "block" ? "none" : "block";
     }
 
+    // Input Validation & Signup
     async function signupUser() {
+        const email = document.getElementById('signEmail').value.trim();
+        const pass = document.getElementById('signPass').value.trim();
+        const reg = document.getElementById('regNo').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const role = document.getElementById('userRole').value;
+
+        if(!email || !pass || !reg || !phone) {
+            return alert("Tafadhali jaza sehemu zote wazi!");
+        }
+        if(pass.length < 6) {
+            return alert("Password lazima iwe na angalau herufi au namba 6!");
+        }
+
         try {
-            const email = document.getElementById('signEmail').value;
-            const pass = document.getElementById('signPass').value;
-            const reg = document.getElementById('regNo').value;
-            const phone = document.getElementById('phone').value;
-            
             const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-            await db.ref('users/' + userCred.user.uid).set({ regNo: reg, phone: phone, name: reg });
+            await db.ref('users/' + userCred.user.uid).set({ 
+                regNo: reg, 
+                phone: phone, 
+                role: role, 
+                name: reg 
+            });
             alert("Usajili umefanikiwa!");
             show('loginPage');
-        } catch(e) { alert(e.message); }
+        } catch(e) { 
+            alert("Hitilafu: " + e.message); 
+        }
     }
 
+    // Login & Role Routing
     function loginUser() {
-        auth.signInWithEmailAndPassword(document.getElementById('logEmail').value, document.getElementById('logPass').value)
+        const email = document.getElementById('logEmail').value.trim();
+        const pass = document.getElementById('logPass').value.trim();
+
+        if(!email || !pass) {
+            return alert("Tafadhali jaza email na password!");
+        }
+
+        auth.signInWithEmailAndPassword(email, pass)
         .then((userCred) => {
             document.getElementById('sidebar').style.display = 'block';
             document.getElementById('topbar').style.display = 'flex';
-            loadUserData(userCred.user.uid);
-            show('dashboard');
-        }).catch(e => alert(e.message));
+            checkUserRoleAndRedirect(userCred.user.uid);
+        }).catch(e => alert("Kosa la kuingia: " + e.message));
     }
 
-    function loadUserData(uid) {
-        db.ref('users/' + uid).on('value', snapshot => {
+    function checkUserRoleAndRedirect(uid) {
+        db.ref('users/' + uid).once('value', snapshot => {
             const data = snapshot.val();
             if(data) {
+                // Hifadhi data za juu
                 if(data.name) {
                     document.getElementById('topUserName').innerText = data.name;
                     document.getElementById('profileName').value = data.name;
@@ -195,48 +258,82 @@
                     document.getElementById('topUserImg').src = data.photo;
                     document.getElementById('profilePreview').src = data.photo;
                 }
+
+                // Ficha menus zote kwanza
+                document.getElementById('menuStudent').style.display = 'none';
+                document.getElementById('menuTeacher').style.display = 'none';
+                document.getElementById('menuAdmin').style.display = 'none';
+
+                // Elekeza kulingana na Role
+                if(data.role === 'teacher') {
+                    document.getElementById('menuTeacher').style.display = 'block';
+                    show('dashboardTeacher');
+                } else if(data.role === 'admin') {
+                    document.getElementById('menuAdmin').style.display = 'block';
+                    show('dashboardAdmin');
+                } else {
+                    document.getElementById('menuStudent').style.display = 'block';
+                    loadActiveSessions();
+                    show('dashboardStudent');
+                }
             }
         });
     }
 
-    function previewProfileImage(event) {
-        const reader = new FileReader();
-        reader.onload = function(){
-            document.getElementById('profilePreview').src = reader.result;
+    // Teacher Session Creator
+    function createSession() {
+        const courseName = document.getElementById('courseName').value.trim();
+        const courseCode = document.getElementById('courseCode').value.trim();
+        const expiryTime = document.getElementById('expiryTime').value;
+
+        if(!courseName || !courseCode || !expiryTime) {
+            return alert("Tafadhali jaza taarifa zote za kipindi!");
         }
-        reader.readAsDataURL(event.target.files[0]);
-    }
 
-    function saveProfile() {
-        const user = auth.currentUser;
-        if(!user) return;
-        const name = document.getElementById('profileName').value;
-        const photoSrc = document.getElementById('profilePreview').src;
-
-        db.ref('users/' + user.uid).update({
-            name: name,
-            photo: photoSrc
+        db.ref('sessions/').push({
+            courseName: courseName,
+            courseCode: courseCode,
+            expiryTime: expiryTime,
+            createdAt: new Date().toISOString()
         }).then(() => {
-            alert("Profile imesasishwa mafanikio!");
+            alert("Kipindi kimetangazwa kikamilifu kwa wanafunzi!");
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseCode').value = '';
         }).catch(e => alert(e.message));
     }
 
-    function logout() { auth.signOut().then(() => location.reload()); }
+    // Load Active Sessions for Students
+    function loadActiveSessions() {
+        db.ref('sessions/').on('value', snapshot => {
+            const select = document.getElementById('activeSessionsSelect');
+            select.innerHTML = '<option value="">Chagua Kipindi Amilifu</option>';
+            snapshot.forEach(child => {
+                const s = child.val();
+                if(new Date(s.expiryTime) > new Date()) {
+                    select.innerHTML += `<option value="${child.key}">${s.courseName} (${s.courseCode})</option>`;
+                }
+            });
+        });
+    }
 
-    // GEOFENCE NA ATTENDANCE
+    // Geofence & Attendance Submission
     function submitAttendance() {
-        const name = document.getElementById('attendName').value;
-        const reg = document.getElementById('attendReg').value;
-        if(!name || !reg) return alert("Tafadhali jaza jina na namba ya usajili!");
+        const sessionId = document.getElementById('activeSessionsSelect').value;
+        const name = document.getElementById('attendName').value.trim();
+        const reg = document.getElementById('attendReg').value.trim();
+
+        if(!sessionId || !name || !reg) {
+            return alert("Tafadhali chagua kipindi na ujaze taarifa zako zote!");
+        }
 
         navigator.geolocation.getCurrentPosition(pos => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
-            // Eneo la ZU (Coordinates za Chuo)
+            // Eneo la ZU (Coordinates za Chuo - Mfano halisi)
             const d = getDist(lat, lon, -6.193839, 39.293476);
             
-            if(d <= 500.0) { 
-                db.ref('attendance/').push({
+            if(d <= 0.5) { // Ndani ya nusu kilomita (Mita 500)
+                db.ref('attendance/' + sessionId).push({
                     jina: name,
                     namba: reg,
                     muda: new Date().toLocaleString()
@@ -256,23 +353,59 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    function changePassword() {
-        const newP = document.getElementById('newPass').value;
-        if(!newP) return alert("Andika password mpya!");
-        auth.currentUser.updatePassword(newP).then(() => {
-            alert("Password imebadilishwa mafanikio!");
+    function previewProfileImage(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            document.getElementById('profilePreview').src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function saveProfile() {
+        const user = auth.currentUser;
+        if(!user) return;
+        const name = document.getElementById('profileName').value.trim();
+        const photoSrc = document.getElementById('profilePreview').src;
+
+        if(!name) return alert("Jina haliwezi kuwa wazi!");
+
+        db.ref('users/' + user.uid).update({
+            name: name,
+            photo: photoSrc
+        }).then(() => {
+            alert("Profile imesasishwa mafanikio!");
         }).catch(e => alert(e.message));
     }
 
+    function changePassword() {
+        const newP = document.getElementById('newPass').value.trim();
+        if(!newP || newP.length < 6) return alert("Andika password mpya yenye angalau herufi 6!");
+        auth.currentUser.updatePassword(newP).then(() => {
+            alert("Password imebadilishwa mafanikio!");
+            document.getElementById('newPass').value = '';
+        }).catch(e => alert(e.message));
+    }
+
+    function logout() { auth.signOut().then(() => location.reload()); }
+
     function downloadCSV() {
-        let csv = "Jina,Namba,Muda\n";
-        db.ref('attendance/').once('value', s => {
-            s.forEach(c => { const d = c.val(); csv += `${d.jina},${d.namba},${d.muda}\n`; });
+        let csv = "Kipindi,Jina,Namba,Muda\n";
+        db.ref('attendance/').once('value', snapshot => {
+            snapshot.forEach(sessionSnap => {
+                sessionSnap.forEach(attSnap => {
+                    const d = attSnap.val();
+                    csv += `${sessionSnap.key},${d.jina},${d.namba},${d.muda}\n`;
+                });
+            });
             const a = document.createElement('a');
             a.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-            a.download = 'Ripoti_Ya_Mahudhurio.csv';
+            a.download = 'Ripoti_Yote_Ya_Mahudhurio.csv';
             a.click();
         });
+    }
+
+    function downloadTeacherCSV() {
+        downloadCSV(); // Inaweza kuwekwa mantiki maalum ya mwalimu kama inahitajika
     }
 </script>
 </body>
